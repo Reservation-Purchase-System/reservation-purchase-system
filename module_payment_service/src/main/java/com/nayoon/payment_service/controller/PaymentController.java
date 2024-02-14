@@ -27,7 +27,8 @@ public class PaymentController {
       @Valid @RequestBody PaymentCreateRequestDto request
   ) {
     Long principalId = Long.valueOf(userId);
-    String result = paymentService.create(principalId, request.purchaseId());
+    double probability = Math.random();
+    String result = paymentService.create(principalId, request.purchaseId(), probability);
 
     if ("fail".equals(result)) {
       return ResponseEntity.badRequest().body("Payment failed.");

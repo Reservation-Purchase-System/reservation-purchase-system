@@ -21,7 +21,7 @@ public class PaymentService {
   /**
    * 결제 진행
    */
-  public String create(Long userId, Long purchaseId) {
+  public String create(Long userId, Long purchaseId, double probability) {
     Payment payment = Payment.builder()
         .purchaseId(purchaseId)
         .userId(userId)
@@ -30,7 +30,6 @@ public class PaymentService {
     Payment saved = paymentRepository.save(payment);
 
     // 80% 성공
-    double probability = Math.random();
     if (0.2 < probability) {
       // purchase_service에 주문 상태 변경 요청
       purchaseClient.updatePurchaseStatus(purchaseId, "confirmed");
@@ -44,7 +43,7 @@ public class PaymentService {
     // 2. purchaseId로 상품 ID 및 주문 수량 반환
     PurchaseQuantityResponseDto quantityDto = purchaseClient.findProductIdByPurchaseId(purchaseId);
 
-    // 2. product_service에 재고 변경 요청
+    // 3. product_service에 재고 변경 요청
     if ("product".equals(quantityDto.productType())) {
       productClient.addProductStock(quantityDto.productId(), quantityDto.quantity());
     } else {
