@@ -22,6 +22,9 @@ public class PaymentService {
    * 결제 진행
    */
   public String create(Long userId, Long purchaseId, double probability) {
+    // 결제 중으로 주문 상태 변경 요청
+    purchaseClient.updatePurchaseStatus(purchaseId, "processing");
+
     Payment payment = Payment.builder()
         .purchaseId(purchaseId)
         .userId(userId)
@@ -37,8 +40,8 @@ public class PaymentService {
     }
 
     // 실패했을 경우 프로세스
-    // 1. purchase_service에 주문 상태 변경 요청
-    purchaseClient.updatePurchaseStatus(purchaseId, "cancelled");
+    // 1. purchase_service에 주문 삭제 요청
+    purchaseClient.delete(purchaseId);
 
     // 2. purchaseId로 상품 ID 및 주문 수량 반환
     PurchaseQuantityResponseDto quantityDto = purchaseClient.findProductIdByPurchaseId(purchaseId);

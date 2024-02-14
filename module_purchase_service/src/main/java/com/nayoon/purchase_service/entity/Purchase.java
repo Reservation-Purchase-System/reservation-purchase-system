@@ -1,7 +1,7 @@
 package com.nayoon.purchase_service.entity;
 
-import com.nayoon.purchase_service.type.PurchaseStatus;
 import com.nayoon.purchase_service.type.ProductType;
+import com.nayoon.purchase_service.type.PurchaseStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -17,7 +17,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Table(name = "purchase")
@@ -51,12 +50,11 @@ public class Purchase {
   @Column(name = "status", nullable = false)
   private PurchaseStatus purchaseStatus;
 
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;
 
   @Column(name = "deleted_at", nullable = false)
-  @LastModifiedDate
   private LocalDateTime deletedAt;
 
   @Builder
@@ -72,6 +70,10 @@ public class Purchase {
 
   public void updateStatus(PurchaseStatus purchaseStatus) {
     this.purchaseStatus = purchaseStatus;
+  }
+
+  public void cancel() {
+    this.deletedAt = LocalDateTime.now();
   }
 
 }

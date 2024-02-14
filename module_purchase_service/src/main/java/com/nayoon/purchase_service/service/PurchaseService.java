@@ -110,4 +110,15 @@ public class PurchaseService {
     return PurchaseQuantityDto.entityToDto(purchase);
   }
 
+  /**
+   * 주문 취소
+   */
+  @Transactional
+  public void cancel(Long purchaseId) {
+    Purchase purchase = purchaseRepository.findById(purchaseId)
+        .orElseThrow(() -> new CustomException(ErrorCode.PURCHASE_NOT_FOUND));
+
+    purchase.cancel();
+  }
+
 }

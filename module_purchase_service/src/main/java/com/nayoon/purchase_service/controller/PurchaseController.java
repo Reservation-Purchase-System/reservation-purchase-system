@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,6 +66,18 @@ public class PurchaseController {
         .map(PurchaseResponseMapper::toDto);
 
     return ResponseEntity.ok().body(response);
+  }
+
+  /**
+   * 주문 취소
+   * - 결제 하기 전에 주문 취소
+   */
+  @DeleteMapping
+  public ResponseEntity<Void> cancel(
+      @RequestParam(name = "id") Long purchaseId
+  ) {
+    purchaseService.cancel(purchaseId);
+    return ResponseEntity.ok().build();
   }
 
 }

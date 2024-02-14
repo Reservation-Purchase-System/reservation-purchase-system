@@ -21,4 +21,10 @@ public interface PurchaseClient {
   @RequestMapping(method = RequestMethod.GET, value = "/api/v1/internal/purchases", consumes = "application/json")
   PurchaseQuantityResponseDto findProductIdByPurchaseId(@RequestParam(name = "id") Long purchaseId);
 
+  /**
+   * 주문 삭제 요청
+   */
+  @RequestMapping(method = RequestMethod.DELETE, value = "/api/v1/internal/purchases", consumes = "application/json")
+  void delete(@RequestParam(name = "id") Long purchaseId);
+
 }
