@@ -27,7 +27,7 @@ public class Payment {
   @Column(name = "payment_id", updatable = false)
   private Long id;
 
-  @Column(name = "purchase_id", nullable = false)
+  @Column(name = "purchae_id", nullable = false)
   private Long purchaseId;
 
   @Column(name = "user_id", nullable = false)
