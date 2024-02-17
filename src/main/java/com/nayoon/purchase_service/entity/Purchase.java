@@ -54,7 +54,7 @@ public class Purchase {
   @CreatedDate
   private LocalDateTime createdAt;
 
-  @Column(name = "deleted_at")
+  @Column(name = "deleted_at", nullable = false)
   private LocalDateTime deletedAt;
 
   @Builder

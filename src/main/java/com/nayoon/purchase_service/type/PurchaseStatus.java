@@ -16,11 +16,11 @@ public enum PurchaseStatus {
     this.purchaseStatus = purchaseStatus;
   }
 
-  public static PurchaseStatus create(String purchaseStatus) {
+  public static PurchaseStatus create(String orderStatus) {
     return Arrays.stream(values())
-        .filter(value -> value.purchaseStatus.equalsIgnoreCase(purchaseStatus))
+        .filter(value -> value.purchaseStatus.equalsIgnoreCase(orderStatus))
         .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Unknown orderStatus: " + purchaseStatus));
+        .orElseThrow(() -> new IllegalArgumentException("Unknown orderStatus: " + orderStatus));
   }
 
 }
