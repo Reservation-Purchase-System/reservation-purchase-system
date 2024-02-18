@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM openjdk:17-alpine
 
 # Set environment variables
 ENV APP_DIR=/opt/app/product-service/classes

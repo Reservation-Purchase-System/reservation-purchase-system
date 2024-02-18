@@ -8,6 +8,7 @@ import com.nayoon.product_service.product.repository.ProductRepository;
 import com.nayoon.product_service.product.repository.ProductStockRepository;
 import com.nayoon.product_service.product.service.dto.ProductDto;
 import com.nayoon.product_service.product.service.dto.ProductStockDto;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,12 +28,15 @@ public class ProductService {
    * 상품 등록
    */
   @Transactional
-  public Long create(Long principalId, String name, String content, Long price, Integer stock) {
+  public Long create(Long principalId, String name, String content, Long price, Integer stock,
+      Boolean isReserved, LocalDateTime openAt) {
     Product product = Product.builder()
         .userId(principalId)
         .name(name)
         .content(content)
         .price(price)
+        .isReserved(isReserved)
+        .openAt(openAt)
         .build();
 
     Product saved = productRepository.save(product);
@@ -50,7 +54,8 @@ public class ProductService {
    * 상품 수정
    */
   @Transactional
-  public void update(Long principalId, Long productId, String name, String content, Long price, Integer stock) {
+  public void update(Long principalId, Long productId, String name, String content, Long price,
+      Integer stock, Boolean isReserved, LocalDateTime openAt) {
     Product product = productRepository.findById(productId)
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -59,7 +64,7 @@ public class ProductService {
 
     checkProductOwner(principalId, product);
 
-    product.update(name, content, price);
+    product.update(name, content, price, isReserved, openAt);
     productStock.update(stock);
   }
 
@@ -103,6 +108,8 @@ public class ProductService {
    */
   @Transactional
   public void addProductStock(Long productId, Integer quantity) {
+    checkCanChangeStock(productId);
+
     ProductStock productStock = productStockRepository.findById(productId)
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
 
@@ -114,10 +121,25 @@ public class ProductService {
    */
   @Transactional
   public void subtractProductStock(Long productId, Integer quantity) {
+    checkCanChangeStock(productId);
+
     ProductStock productStock = productStockRepository.findById(productId)
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
 
     productStock.subtractProductStockByOrder(quantity);
+  }
+
+  private void checkCanChangeStock(Long productId) {
+    Product product = productRepository.findById(productId)
+        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+    Boolean isReserved = product.getIsReserved();
+    LocalDateTime openAt = product.getOpenAt();
+    LocalDateTime now = LocalDateTime.now();
+
+    if (isReserved && now.isBefore(openAt)) {
+      throw new CustomException(ErrorCode.CANNOT_HANDLE_PRODUCT_STOCK_NOW);
+    }
   }
 
 }

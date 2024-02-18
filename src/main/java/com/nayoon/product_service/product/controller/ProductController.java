@@ -42,7 +42,7 @@ public class ProductController {
 
     Long productId =
         productService.create(principalId, request.name(), request.content(), request.price(),
-            request.stock());
+            request.stock(), request.isReserved(), request.openAt());
 
     return ResponseEntity.created(URI.create("api/v1/products/" + productId)).build();
   }
@@ -58,7 +58,7 @@ public class ProductController {
   ) {
     Long principalId = Long.valueOf(userId);
     productService.update(principalId, productId, request.name(), request.content(),
-        request.price(), request.stock());
+        request.price(), request.stock(), request.isReserved(), request.openAt());
     return ResponseEntity.ok().build();
   }
 
