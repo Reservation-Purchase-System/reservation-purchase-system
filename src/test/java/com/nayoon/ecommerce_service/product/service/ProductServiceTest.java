@@ -20,6 +20,7 @@ import com.nayoon.product_service.product.repository.ProductStockRepository;
 import com.nayoon.product_service.product.service.ProductService;
 import com.nayoon.product_service.product.service.dto.ProductDto;
 import com.nayoon.product_service.product.service.dto.ProductStockDto;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -55,16 +56,19 @@ class ProductServiceTest {
     void success() {
       //given
       ProductCreateRequestDto request = mockProductCreateRequest();
-      Product product = mockProduct();
+      Product product = mockProduct(1);
 
-      when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {return product;});
+      when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+        return product;
+      });
       when(productStockRepository.save(any(ProductStock.class))).thenAnswer(invocation -> {
         return ProductStock.builder().productId(product.getId()).stock(request.stock()).build();
       });
 
       //when
-      Long productId = productService.create(product.getId(), request.name(), request.content(), request.price(),
-          request.stock());
+      Long productId = productService.create(product.getId(), request.name(), request.content(),
+          request.price(),
+          request.stock(), request.isReserved(), request.openAt());
 
       //then
       assertEquals(productId, product.getId());
@@ -84,7 +88,7 @@ class ProductServiceTest {
       //given
       Long principalId = 1L;
       ProductUpdateRequestDto request = mockProductUpdateRequest();
-      Product product = mockProduct();
+      Product product = mockProduct(1);
       productRepository.save(product);
 
       ProductStock productStock = mock(ProductStock.class);
@@ -94,8 +98,9 @@ class ProductServiceTest {
       when(productStockRepository.findById(product.getId())).thenReturn(Optional.of(productStock));
 
       //when
-      productService.update(principalId, product.getId(), request.name(), request.content(), request.price(),
-          request.stock());
+      productService.update(principalId, product.getId(), request.name(), request.content(),
+          request.price(),
+          request.stock(), request.isReserved(), request.openAt());
 
       //then
       verify(productRepository, times(1)).save(any(Product.class));
@@ -116,8 +121,8 @@ class ProductServiceTest {
 
       // Mock data for products
       List<Product> products = Arrays.asList(
-          mockProduct(),
-          mockProduct2()
+          mockProduct(1),
+          mockProduct(2)
       );
       when(productRepository.filterAllProducts(eq(pageable))).thenReturn(new PageImpl<>(products));
 
@@ -176,7 +181,7 @@ class ProductServiceTest {
     void success() {
       //given
       Long productId = 1L;
-      Product product = mockProduct();
+      Product product = mockProduct(1);
 
       when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
@@ -205,30 +210,90 @@ class ProductServiceTest {
 
   }
 
-  private Product mockProduct2() {
-    return Product.builder()
-        .userId(1L)
-        .name("테스트 상품2")
-        .content("테스트 상품2 내용")
-        .price(20000L)
+  @Nested
+  @DisplayName("재고 증가")
+  class addProductStock {
+
+    @Test
+    @DisplayName("성공")
+    void success() {
+      //given
+      Long productId = 1L;
+      LocalDateTime openAt = LocalDateTime.now();
+      Integer quantity = 10;
+      Integer stock = 100;
+
+      Product product = mockReservationProduct(openAt);
+      ProductStock productStock = mockProductStock(productId, stock);
+
+      when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+      when(productStockRepository.findById(productId)).thenReturn(Optional.of(productStock));
+
+      //when
+      productService.addProductStock(productId, quantity);
+
+      //then
+      assertEquals(stock + quantity, productStock.getStock());
+    }
+
+    @Test
+    @DisplayName("실패: 상품 오픈 시간이 아직 되지 않음")
+    void cannotHandleProductStockNow() {
+      //given
+      Long productId = 1L;
+      LocalDateTime openAt = LocalDateTime.now().plusHours(1);
+      Integer quantity = 10;
+      Integer stock = 100;
+
+      Product product = mockReservationProduct(openAt);
+
+      when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+      //when
+      CustomException exception = assertThrows(CustomException.class, ()
+          -> productService.addProductStock(productId, quantity));
+
+      //then
+      assertEquals(ErrorCode.CANNOT_HANDLE_PRODUCT_STOCK_NOW, exception.getErrorCode());
+    }
+
+  }
+
+  private ProductStock mockProductStock(Long productId, Integer stock) {
+    return ProductStock.builder()
+        .productId(productId)
+        .stock(stock)
         .build();
   }
 
-  private Product mockProduct() {
+  private Product mockReservationProduct(LocalDateTime openAt) {
     return Product.builder()
         .userId(1L)
-        .name("테스트 상품1")
-        .content("테스트 상품1 내용")
+        .name("예약 상품 테스트")
+        .content("예약 상품 테스트 내용")
+        .price(20000L)
+        .isReserved(true)
+        .openAt(openAt)
+        .build();
+  }
+
+  private Product mockProduct(int num) {
+    return Product.builder()
+        .userId(1L)
+        .name("일반 상품 테스트" + num)
+        .content("일반 상품 테스트 내용" + num)
         .price(10000L)
+        .isReserved(false)
         .build();
   }
 
   private ProductCreateRequestDto mockProductCreateRequest() {
     return ProductCreateRequestDto.builder()
-        .name("테스트 상품1")
-        .content("테스트 상품1 내용")
+        .name("일반 상품 테스트")
+        .content("일반 상품 테스트 내용")
         .price(10000L)
         .stock(100)
+        .isReserved(false)
         .build();
   }
 
