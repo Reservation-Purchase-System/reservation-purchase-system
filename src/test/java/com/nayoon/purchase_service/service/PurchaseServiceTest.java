@@ -245,7 +245,6 @@ class PurchaseServiceTest {
     return PurchaseCreateRequestDto.builder()
         .productId(1L)
         .quantity(5)
-        .productType("product")
         .address("address1")
         .build();
   }
@@ -254,7 +253,6 @@ class PurchaseServiceTest {
     return PurchaseCreateRequestDto.builder()
         .productId(1L)
         .quantity(5)
-        .productType("reservationProduct")
         .address("address1")
         .build();
   }
