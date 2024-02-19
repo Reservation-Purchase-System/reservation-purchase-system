@@ -40,7 +40,7 @@ public class PurchaseController {
     String purchaseStatus = "pending"; // 결제 완료 전
 
     Long purchaseId = purchaseService.create(principalId, request.productId(), request.quantity(),
-        request.productType(), request.address(), purchaseStatus);
+        request.address(), purchaseStatus);
 
     return ResponseEntity.created(URI.create("api/v1/purchases/" + purchaseId)).build();
   }

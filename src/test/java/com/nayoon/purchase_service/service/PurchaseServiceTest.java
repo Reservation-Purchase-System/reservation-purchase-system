@@ -9,13 +9,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.nayoon.purchase_service.client.ProductClient;
-import com.nayoon.purchase_service.client.dto.ReservationProductStockDto;
+import com.nayoon.purchase_service.client.dto.ProductStockDto;
 import com.nayoon.purchase_service.common.exception.CustomException;
 import com.nayoon.purchase_service.common.exception.ErrorCode;
 import com.nayoon.purchase_service.controller.dto.request.PurchaseCreateRequestDto;
 import com.nayoon.purchase_service.entity.Purchase;
 import com.nayoon.purchase_service.repository.PurchaseRepository;
-import com.nayoon.purchase_service.type.ProductType;
 import com.nayoon.purchase_service.type.PurchaseStatus;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -61,12 +60,12 @@ class PurchaseServiceTest {
         return purchase;
       });
       when(productClient.findProductStock(anyLong())).thenAnswer(invocation -> {
-        return 100;
+        return ProductStockDto.builder().productId(purchase.getProductId()).stock(100).build();
       });
 
       //when
       Long purchaseId = purchaseService.create(userId, request.productId(), request.quantity(),
-          request.productType(), request.address(), "pending");
+          request.address(), "pending");
 
       //then
       assertEquals(purchaseId, purchase.getId());
@@ -79,11 +78,17 @@ class PurchaseServiceTest {
       //given
       Long userId = 1L;
       PurchaseCreateRequestDto request = mockPurchaseCreateRequest();
+      Purchase purchase = mockPurchase(userId);
+
+      when(productClient.findProductStock(anyLong())).thenAnswer(invocation -> {
+            return ProductStockDto.builder().productId(purchase.getProductId()).stock(0).build();
+          }
+      );
 
       //when
       CustomException exception = assertThrows(CustomException.class, ()
           -> purchaseService.create(userId, request.productId(), request.quantity(),
-          request.productType(), request.address(), "pending"));
+          request.address(), "pending"));
 
       //then
       assertEquals(ErrorCode.INSUFFICIENT_STOCK, exception.getErrorCode());
@@ -103,20 +108,20 @@ class PurchaseServiceTest {
       PurchaseCreateRequestDto request = mockReservationPurchaseCreateRequest();
       Purchase purchase = mockReservationPurchase(userId);
       // 예약 상품의 예약 시간을 현재 시간으로부터 한 시간 전으로 설정
-      LocalDateTime reservedAt = LocalDateTime.now().minus(1, ChronoUnit.HOURS);
+      LocalDateTime openAt = LocalDateTime.now().minus(1, ChronoUnit.HOURS);
 
       when(purchaseRepository.save(any(Purchase.class))).thenAnswer(invocation -> {
         return purchase;
       });
-      when(productClient.findReservationProductStock(anyLong())).thenAnswer(invocation -> {
-            return ReservationProductStockDto.builder().productId(purchase.getProductId()).stock(100)
-                .reservedAt(reservedAt).build();
+      when(productClient.findProductStock(anyLong())).thenAnswer(invocation -> {
+            return ProductStockDto.builder().productId(purchase.getProductId()).stock(100)
+                .openAt(openAt).build();
           }
       );
 
       //when
       Long purchaseId = purchaseService.create(userId, request.productId(), request.quantity(),
-          request.productType(), request.address(), "pending");
+          request.address(), "pending");
 
       //then
       assertEquals(purchaseId, purchase.getId());
@@ -130,18 +135,18 @@ class PurchaseServiceTest {
       Long userId = 1L;
       PurchaseCreateRequestDto request = mockReservationPurchaseCreateRequest();
       Purchase purchase = mockReservationPurchase(userId);
-      LocalDateTime reservedAt = LocalDateTime.now().minus(1, ChronoUnit.HOURS);
+      LocalDateTime openAt = LocalDateTime.now().minus(1, ChronoUnit.HOURS);
 
-      when(productClient.findReservationProductStock(anyLong())).thenAnswer(invocation -> {
-            return ReservationProductStockDto.builder().productId(purchase.getProductId()).stock(0)
-                .reservedAt(reservedAt).build();
+      when(productClient.findProductStock(anyLong())).thenAnswer(invocation -> {
+            return ProductStockDto.builder().productId(purchase.getProductId()).stock(0)
+                .openAt(openAt).build();
           }
       );
 
       //when
       CustomException exception = assertThrows(CustomException.class, ()
           -> purchaseService.create(userId, request.productId(), request.quantity(),
-          request.productType(), request.address(), "pending"));
+          request.address(), "pending"));
 
       //then
       assertEquals(ErrorCode.INSUFFICIENT_STOCK, exception.getErrorCode());
@@ -154,18 +159,18 @@ class PurchaseServiceTest {
       Long userId = 1L;
       PurchaseCreateRequestDto request = mockReservationPurchaseCreateRequest();
       Purchase purchase = mockReservationPurchase(userId);
-      LocalDateTime reservedAt = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
+      LocalDateTime openAt = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
 
-      when(productClient.findReservationProductStock(anyLong())).thenAnswer(invocation -> {
-            return ReservationProductStockDto.builder().productId(purchase.getProductId()).stock(100)
-                .reservedAt(reservedAt).build();
+      when(productClient.findProductStock(anyLong())).thenAnswer(invocation -> {
+            return ProductStockDto.builder().productId(purchase.getProductId()).stock(100)
+                .openAt(openAt).build();
           }
       );
 
       //when
       CustomException exception = assertThrows(CustomException.class, ()
           -> purchaseService.create(userId, request.productId(), request.quantity(),
-          request.productType(), request.address(), "pending"));
+          request.address(), "pending"));
 
       //then
       assertEquals(ErrorCode.PURCHASE_NOT_AVAILABLE, exception.getErrorCode());
@@ -211,7 +216,6 @@ class PurchaseServiceTest {
         .userId(userId)
         .productId(1L)
         .quantity(5)
-        .productType(ProductType.create("product"))
         .address("address1")
         .purchaseStatus(PurchaseStatus.create("pending"))
         .build();
@@ -222,7 +226,6 @@ class PurchaseServiceTest {
         .userId(userId)
         .productId(2L)
         .quantity(5)
-        .productType(ProductType.create("reservationProduct"))
         .address("address1")
         .purchaseStatus(PurchaseStatus.create("confirmed"))
         .build();
@@ -233,7 +236,6 @@ class PurchaseServiceTest {
         .userId(userId)
         .productId(1L)
         .quantity(5)
-        .productType(ProductType.create("reservationProduct"))
         .address("address1")
         .purchaseStatus(PurchaseStatus.create("pending"))
         .build();

@@ -6,15 +6,13 @@ import lombok.Builder;
 @Builder
 public record PurchaseQuantityResponseDto(
     Long productId,
-    Integer quantity,
-    String productType
+    Integer quantity
 ) {
 
   public static PurchaseQuantityResponseDto dtoToResponseDto(PurchaseQuantityDto dto) {
     return PurchaseQuantityResponseDto.builder()
         .productId(dto.productId())
         .quantity(dto.quantity())
-        .productType(dto.productType().getProductType())
         .build();
   }
 
