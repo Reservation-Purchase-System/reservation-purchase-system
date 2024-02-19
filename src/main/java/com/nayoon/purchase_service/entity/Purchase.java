@@ -1,12 +1,9 @@
 package com.nayoon.purchase_service.entity;
 
-import com.nayoon.purchase_service.type.ProductType;
 import com.nayoon.purchase_service.type.PurchaseStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,10 +37,6 @@ public class Purchase {
   @Column(name = "quantity", nullable = false)
   private Integer quantity;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "product_type")
-  private ProductType productType;
-
   @Column(name = "address", nullable = false)
   private String address;
 
@@ -54,16 +47,15 @@ public class Purchase {
   @CreatedDate
   private LocalDateTime createdAt;
 
-  @Column(name = "deleted_at", nullable = false)
+  @Column(name = "deleted_at")
   private LocalDateTime deletedAt;
 
   @Builder
-  public Purchase(Long userId, Long productId, Integer quantity, ProductType productType,
-      String address, PurchaseStatus purchaseStatus) {
+  public Purchase(Long userId, Long productId, Integer quantity, String address,
+      PurchaseStatus purchaseStatus) {
     this.userId = userId;
     this.productId = productId;
     this.quantity = quantity;
-    this.productType = productType;
     this.address = address;
     this.purchaseStatus = purchaseStatus;
   }

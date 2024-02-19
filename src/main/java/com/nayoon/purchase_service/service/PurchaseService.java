@@ -5,9 +5,8 @@ import com.nayoon.purchase_service.common.exception.CustomException;
 import com.nayoon.purchase_service.common.exception.ErrorCode;
 import com.nayoon.purchase_service.entity.Purchase;
 import com.nayoon.purchase_service.repository.PurchaseRepository;
+import com.nayoon.purchase_service.service.dto.ProductStockResponseDto;
 import com.nayoon.purchase_service.service.dto.PurchaseQuantityDto;
-import com.nayoon.purchase_service.service.dto.ReservationProductStockResponseDto;
-import com.nayoon.purchase_service.type.ProductType;
 import com.nayoon.purchase_service.type.PurchaseStatus;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -30,55 +29,39 @@ public class PurchaseService {
    * - 결제하기 버튼 클릭 시 요청
    */
   @Transactional
-  public Long create(Long principalId, Long productId, Integer quantity, String productType,
-      String address, String purchaseStatus) {
+  public Long create(Long principalId, Long productId, Integer quantity, String address, String purchaseStatus) {
     // 주문 시 재고 확인
-    checkAvailableStock(quantity, productId, productType);
+    checkAvailableStock(quantity, productId);
 
     Purchase purchase = Purchase.builder()
         .userId(principalId)
         .productId(productId)
         .quantity(quantity)
         .address(address)
-        .productType(ProductType.create(productType))
         .purchaseStatus(PurchaseStatus.create(purchaseStatus))
         .build();
 
     Purchase savedPurchaseEntity = purchaseRepository.save(purchase);
 
+    // 주문 생성이 성공한 경우에만 재고 감소
+    productClient.decreaseProductStock(productId, quantity);
+
     return savedPurchaseEntity.getId();
   }
 
   // 남은 재고를 파악하여 주문 가능한 수량인지 확인
-  private void checkAvailableStock(Integer orderQuantity, Long productId, String productType) {
-    // 재고 수량
-    Integer stock = 0;
+  private void checkAvailableStock(Integer orderQuantity, Long productId) {
+    // 재고 수량 및 오픈 시간
+    ProductStockResponseDto dto = ProductStockResponseDto.toResponseDto(productClient.findProductStock(productId));
+    Integer stock = dto.stock();
 
-    // productType에 따라 다르게 요청
-    if ("product".equals(productType)) {
-      stock = productClient.findProductStock(productId);
-    } else {
-      ReservationProductStockResponseDto dto =
-          ReservationProductStockResponseDto.toResponseDto(productClient.findReservationProductStock(productId));
-
-      LocalDateTime reservedAt = dto.reservedAt();
-      if (reservedAt != null && reservedAt.isAfter(LocalDateTime.now())) {
-        throw new CustomException(ErrorCode.PURCHASE_NOT_AVAILABLE);
-      }
-
-      stock = dto.stock();
+    if (dto.openAt() != null && dto.openAt().isAfter(LocalDateTime.now())) {
+      throw new CustomException(ErrorCode.PURCHASE_NOT_AVAILABLE);
     }
 
     // 재고가 주문 quantity보다 적다면 예외 발생
     if (stock < orderQuantity) {
       throw new CustomException(ErrorCode.INSUFFICIENT_STOCK);
-    }
-
-    // 주문 만큼 재고 감소
-    if ("product".equals(productType)) {
-      productClient.subtractProductStock(productId, orderQuantity);
-    } else {
-      productClient.subtractReservationProductStock(productId, orderQuantity);
     }
   }
 
