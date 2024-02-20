@@ -64,11 +64,12 @@ public class StockService {
   @CachePut(value = "stock", key = "#productId")
   public Integer decreaseStock(Long productId, Integer quantity) {
     Stock stock = loadStock(productId);
-    stock.decrease(quantity);
 
-    if (stock.getInitialStock() < stock.getStock()) {
+    if (stock.getStock() < quantity) {
       throw new CustomException(ErrorCode.OUT_OF_STOCK);
     }
+
+    stock.decrease(quantity);
 
     stockRepository.save(stock);
     return stock.getStock();
