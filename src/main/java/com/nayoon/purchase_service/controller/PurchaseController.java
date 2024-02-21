@@ -2,7 +2,6 @@ package com.nayoon.purchase_service.controller;
 
 import com.nayoon.purchase_service.controller.dto.request.PurchaseCreateRequestDto;
 import com.nayoon.purchase_service.controller.dto.response.PurchaseResponseDto;
-import com.nayoon.purchase_service.mapper.PurchaseResponseMapper;
 import com.nayoon.purchase_service.service.PurchaseService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -14,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -37,10 +37,9 @@ public class PurchaseController {
       @Valid @RequestBody PurchaseCreateRequestDto request
   ) {
     Long principalId = Long.valueOf(userId);
-    String purchaseStatus = "pending"; // 결제 완료 전
 
     Long purchaseId = purchaseService.create(principalId, request.productId(), request.quantity(),
-        request.address(), purchaseStatus);
+        request.address());
 
     return ResponseEntity.created(URI.create("api/v1/purchases/" + purchaseId)).build();
   }
@@ -63,7 +62,7 @@ public class PurchaseController {
 
     Long principalId = Long.valueOf(userId);
     Page<PurchaseResponseDto> response = purchaseService.getPurchasesByUserId(principalId, pageable)
-        .map(PurchaseResponseMapper::toDto);
+        .map(PurchaseResponseDto::entityToDto);
 
     return ResponseEntity.ok().body(response);
   }
@@ -72,9 +71,9 @@ public class PurchaseController {
    * 주문 취소
    * - 결제 하기 전에 주문 취소
    */
-  @DeleteMapping
+  @DeleteMapping("/{id}")
   public ResponseEntity<Void> cancel(
-      @RequestParam(name = "id") Long purchaseId
+      @PathVariable(name = "id") Long purchaseId
   ) {
     purchaseService.cancel(purchaseId);
     return ResponseEntity.ok().build();

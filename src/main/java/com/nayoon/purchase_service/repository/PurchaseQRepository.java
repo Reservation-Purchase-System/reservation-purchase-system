@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface PurchaseQRepository {
 
-  Page<Purchase> getOrdersByUserId(Long userId, Pageable pageable);
+  Page<Purchase> getPurchasesByUserId(Long userId, Pageable pageable);
+  Integer getQuantitySumByProductId(Long productId);
 
 }

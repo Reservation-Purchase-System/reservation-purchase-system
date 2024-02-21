@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,23 +19,11 @@ public class InternalPurchaseController {
   private final PurchaseService purchaseService;
 
   /**
-   * 주문 상태 변경
-   */
-  @PostMapping
-  public ResponseEntity<Void> updateStatus(
-      @RequestParam(name = "id") Long purchaseId,
-      @RequestParam(name = "status") String purchaseStatus
-  ) {
-    purchaseService.updateStatus(purchaseId, purchaseStatus);
-    return ResponseEntity.ok().build();
-  }
-
-  /**
    * 주문 ID로 상품 ID 반환
    */
-  @GetMapping
+  @GetMapping("/{purchaseId}")
   public ResponseEntity<PurchaseQuantityResponseDto> findProductIdByPurchaseId(
-      @RequestParam(name = "id") Long purchaseId
+      @PathVariable(name = "purchaseId") Long purchaseId
   ) {
     PurchaseQuantityResponseDto response = PurchaseQuantityResponseDto.dtoToResponseDto(
         purchaseService.findProductIdByPurchaseId(purchaseId));
@@ -51,6 +39,16 @@ public class InternalPurchaseController {
   ) {
     purchaseService.cancel(purchaseId);
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * 결제 프로세스 진입한 모든 주문 반환
+   */
+  @GetMapping("/{productId}/quantity")
+  public ResponseEntity<Integer> getQuantitySumByProductId(
+      @PathVariable(name = "productId") Long productId
+  ) {
+    return ResponseEntity.ok().body(purchaseService.getQuantitySumByProductId(productId));
   }
 
 }
