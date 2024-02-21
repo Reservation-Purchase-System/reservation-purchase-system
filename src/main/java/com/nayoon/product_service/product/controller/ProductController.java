@@ -3,7 +3,6 @@ package com.nayoon.product_service.product.controller;
 import com.nayoon.product_service.product.controller.dto.request.ProductCreateRequestDto;
 import com.nayoon.product_service.product.controller.dto.request.ProductUpdateRequestDto;
 import com.nayoon.product_service.product.controller.dto.response.ProductResponseDto;
-import com.nayoon.product_service.product.controller.dto.response.ProductStockResponseDto;
 import com.nayoon.product_service.product.service.ProductService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -92,18 +91,6 @@ public class ProductController {
     Page<ProductResponseDto> products = productService.getAllProducts(pageable)
         .map(ProductResponseDto::entityToResponseDto);
     return ResponseEntity.ok().body(products);
-  }
-
-  /**
-   * 상품 재고 조회
-   */
-  @GetMapping("/{id}/stock")
-  public ResponseEntity<ProductStockResponseDto> getProductStockById(
-      @PathVariable(name = "id") Long productId
-  ) {
-    ProductStockResponseDto response =
-        ProductStockResponseDto.dtoToResponseDto(productService.getProductStockById(productId));
-    return ResponseEntity.ok().body(response);
   }
 
 }
