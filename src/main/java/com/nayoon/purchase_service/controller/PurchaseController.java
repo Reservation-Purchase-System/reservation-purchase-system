@@ -2,7 +2,6 @@ package com.nayoon.purchase_service.controller;
 
 import com.nayoon.purchase_service.controller.dto.request.PurchaseCreateRequestDto;
 import com.nayoon.purchase_service.controller.dto.response.PurchaseResponseDto;
-import com.nayoon.purchase_service.mapper.PurchaseResponseMapper;
 import com.nayoon.purchase_service.service.PurchaseService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -63,7 +62,7 @@ public class PurchaseController {
 
     Long principalId = Long.valueOf(userId);
     Page<PurchaseResponseDto> response = purchaseService.getPurchasesByUserId(principalId, pageable)
-        .map(PurchaseResponseMapper::toDto);
+        .map(PurchaseResponseDto::entityToDto);
 
     return ResponseEntity.ok().body(response);
   }

@@ -40,6 +40,9 @@ public class PurchaseLogging {
   @Column(name = "quantity", nullable = false)
   private Integer quantity;
 
+  @Column(name = "price", nullable = false)
+  private Long price;
+
   @Column(name = "address", nullable = false)
   private String address;
 
@@ -56,6 +59,7 @@ public class PurchaseLogging {
     this.userId = purchase.getUserId();
     this.productId = purchase.getProductId();
     this.quantity = purchase.getQuantity();
+    this.price = purchase.getPrice();
     this.address = purchase.getAddress();
     this.action = action;
   }

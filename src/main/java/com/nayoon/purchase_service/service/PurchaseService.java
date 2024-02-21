@@ -30,22 +30,25 @@ public class PurchaseService {
   private final StockClient stockClient;
 
   /**
-   * 주문 생성
-   * - 결제 프로세스 진입
+   * 주문 생성 - 결제 프로세스 진입
    */
   @Transactional
   public Long create(Long principalId, Long productId, Integer quantity, String address) {
     // 주문 시 재고 및 주문 가능한 시간인지 확인
     checkPurchaseAvailable(quantity, productId);
 
+    // 상품 정보 요청
+    ProductDto productDto = ProductDto.responseToDto(productClient.findProductInfo(productId));
+
     Purchase purchase = Purchase.builder()
         .userId(principalId)
         .productId(productId)
         .quantity(quantity)
+        .price(productDto.price() * quantity)
         .address(address)
         .build();
 
-    Purchase savedPurchaseEntity = purchaseRepository.save(purchase);
+    Purchase savedPurchase = purchaseRepository.save(purchase);
 
     // 주문 생성이 성공한 경우에만 재고 감소
     stockClient.decreaseProductStock(productId, quantity);
@@ -53,7 +56,7 @@ public class PurchaseService {
     // 로깅 테이블에 저장
     purchaseLoggingRepository.save(new PurchaseLogging(purchase, PurchaseAction.CREATE));
 
-    return savedPurchaseEntity.getId();
+    return savedPurchase.getId();
   }
 
   // 남은 재고를 파악하여 주문 가능한 수량인지 확인
@@ -76,8 +79,7 @@ public class PurchaseService {
   }
 
   /**
-   * 주문 취소
-   * - 결제 프로세스 이탈
+   * 주문 취소 - 결제 프로세스 이탈
    */
   @Transactional
   public void cancel(Long purchaseId) {

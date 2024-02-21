@@ -36,6 +36,9 @@ public class Purchase {
   @Column(name = "quantity", nullable = false)
   private Integer quantity;
 
+  @Column(name = "price", nullable = false)
+  private Long price;
+
   @Column(name = "address", nullable = false)
   private String address;
 
@@ -47,10 +50,11 @@ public class Purchase {
   private LocalDateTime deletedAt;
 
   @Builder
-  public Purchase(Long userId, Long productId, Integer quantity, String address) {
+  public Purchase(Long userId, Long productId, Integer quantity, Long price, String address) {
     this.userId = userId;
     this.productId = productId;
     this.quantity = quantity;
+    this.price = price;
     this.address = address;
   }
 

@@ -3,7 +3,8 @@ package com.nayoon.purchase_service.type;
 public enum PurchaseAction {
 
   CREATE("CREATE"),
-  CANCEL("CANCEL");
+  CANCEL("CANCEL"),
+  COMPLETE("COMPLETE");
 
   private final String value;
 
