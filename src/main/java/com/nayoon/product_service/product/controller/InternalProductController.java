@@ -1,10 +1,10 @@
 package com.nayoon.product_service.product.controller;
 
+import com.nayoon.product_service.product.controller.dto.response.ProductResponseDto;
 import com.nayoon.product_service.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,37 +17,15 @@ public class InternalProductController {
   private final ProductService productService;
 
   /**
-   * 주문가능한 상품 재고 조회
+   * 상품 정보 조회
    */
-  @GetMapping("/stock")
-  public ResponseEntity<Integer> getProductStockById(
+  @GetMapping
+  public ResponseEntity<ProductResponseDto> getProductInfoById(
       @RequestParam(name = "id") Long productId
   ) {
-    return ResponseEntity.ok().body(productService.getProductStockById(productId).stock());
-  }
-
-  /**
-   * 상품 재고 증가
-   */
-  @PostMapping("/stock/add")
-  public ResponseEntity<Void> addProductStock(
-      @RequestParam(name = "id") Long productId,
-      @RequestParam(name = "quantity") Integer quantity
-  ) {
-    productService.addProductStock(productId, quantity);
-    return ResponseEntity.ok().build();
-  }
-
-  /**
-   * 상품 재고 감소
-   */
-  @PostMapping("/stock/subtract")
-  public ResponseEntity<Void> subtractProductStock(
-      @RequestParam(name = "id") Long productId,
-      @RequestParam(name = "quantity") Integer quantity
-  ) {
-    productService.subtractProductStock(productId, quantity);
-    return ResponseEntity.ok().build();
+    ProductResponseDto response =
+        ProductResponseDto.dtoToResponseDto(productService.getProductInfoById(productId));
+    return ResponseEntity.ok().body(response);
   }
 
 }

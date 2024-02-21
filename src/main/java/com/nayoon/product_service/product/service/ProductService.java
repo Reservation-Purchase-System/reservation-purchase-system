@@ -1,13 +1,11 @@
 package com.nayoon.product_service.product.service;
 
+import com.nayoon.product_service.client.StockClient;
 import com.nayoon.product_service.common.exception.CustomException;
 import com.nayoon.product_service.common.exception.ErrorCode;
 import com.nayoon.product_service.product.entity.Product;
-import com.nayoon.product_service.product.entity.ProductStock;
 import com.nayoon.product_service.product.repository.ProductRepository;
-import com.nayoon.product_service.product.repository.ProductStockRepository;
 import com.nayoon.product_service.product.service.dto.ProductDto;
-import com.nayoon.product_service.product.service.dto.ProductStockDto;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
   private final ProductRepository productRepository;
-  private final ProductStockRepository productStockRepository;
+  private final StockClient stockClient;
 
   /**
    * 상품 등록
@@ -40,12 +38,7 @@ public class ProductService {
         .build();
 
     Product saved = productRepository.save(product);
-    ProductStock productStock = ProductStock.builder()
-        .productId(saved.getId())
-        .stock(stock)
-        .build();
-
-    productStockRepository.save(productStock);
+    stockClient.createOrUpdate(saved.getId(), stock);
 
     return saved.getId();
   }
@@ -58,14 +51,11 @@ public class ProductService {
       Integer stock, Boolean isReserved, LocalDateTime openAt) {
     Product product = productRepository.findById(productId)
         .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-
-    ProductStock productStock = productStockRepository.findById(productId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
     checkProductOwner(principalId, product);
 
+    stockClient.createOrUpdate(productId, stock);
+
     product.update(name, content, price, isReserved, openAt);
-    productStock.update(stock);
   }
 
   private void checkProductOwner(Long principalId, Product product) {
@@ -90,56 +80,6 @@ public class ProductService {
    */
   public Page<Product> getAllProducts(Pageable pageable) {
     return productRepository.filterAllProducts(pageable);
-  }
-
-  /**
-   * 상품 재고 조회
-   */
-  // TODO: 결제 프로세스 진입한 수 제외하고 반환
-  public ProductStockDto getProductStockById(Long productId) {
-    ProductStock productStock = productStockRepository.findById(productId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
-    return ProductStockDto.toDto(productStock);
-  }
-
-  /**
-   * 재고 증가
-   */
-  @Transactional
-  public void addProductStock(Long productId, Integer quantity) {
-    checkCanChangeStock(productId);
-
-    ProductStock productStock = productStockRepository.findById(productId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
-    productStock.addProductStockByOrder(quantity);
-  }
-
-  /**
-   * 재고 감소
-   */
-  @Transactional
-  public void subtractProductStock(Long productId, Integer quantity) {
-    checkCanChangeStock(productId);
-
-    ProductStock productStock = productStockRepository.findById(productId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
-    productStock.subtractProductStockByOrder(quantity);
-  }
-
-  private void checkCanChangeStock(Long productId) {
-    Product product = productRepository.findById(productId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-
-    Boolean isReserved = product.getIsReserved();
-    LocalDateTime openAt = product.getOpenAt();
-    LocalDateTime now = LocalDateTime.now();
-
-    if (isReserved && now.isBefore(openAt)) {
-      throw new CustomException(ErrorCode.CANNOT_HANDLE_PRODUCT_STOCK_NOW);
-    }
   }
 
 }

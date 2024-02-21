@@ -4,23 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.nayoon.product_service.client.StockClient;
 import com.nayoon.product_service.common.exception.CustomException;
 import com.nayoon.product_service.common.exception.ErrorCode;
 import com.nayoon.product_service.product.controller.dto.request.ProductCreateRequestDto;
 import com.nayoon.product_service.product.controller.dto.request.ProductUpdateRequestDto;
 import com.nayoon.product_service.product.entity.Product;
-import com.nayoon.product_service.product.entity.ProductStock;
 import com.nayoon.product_service.product.repository.ProductRepository;
-import com.nayoon.product_service.product.repository.ProductStockRepository;
 import com.nayoon.product_service.product.service.ProductService;
 import com.nayoon.product_service.product.service.dto.ProductDto;
-import com.nayoon.product_service.product.service.dto.ProductStockDto;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +41,7 @@ class ProductServiceTest {
   private ProductRepository productRepository;
 
   @Mock
-  private ProductStockRepository productStockRepository;
+  private StockClient stockClient;
 
   @Nested
   @DisplayName("상품 등록")
@@ -61,9 +57,6 @@ class ProductServiceTest {
       when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
         return product;
       });
-      when(productStockRepository.save(any(ProductStock.class))).thenAnswer(invocation -> {
-        return ProductStock.builder().productId(product.getId()).stock(request.stock()).build();
-      });
 
       //when
       Long productId = productService.create(product.getId(), request.name(), request.content(),
@@ -73,7 +66,6 @@ class ProductServiceTest {
       //then
       assertEquals(productId, product.getId());
       verify(productRepository, times(1)).save(any(Product.class));
-      verify(productStockRepository, times(1)).save(any(ProductStock.class));
     }
 
   }
@@ -91,11 +83,7 @@ class ProductServiceTest {
       Product product = mockProduct(1);
       productRepository.save(product);
 
-      ProductStock productStock = mock(ProductStock.class);
-      productStockRepository.save(productStock);
-
       when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
-      when(productStockRepository.findById(product.getId())).thenReturn(Optional.of(productStock));
 
       //when
       productService.update(principalId, product.getId(), request.name(), request.content(),
@@ -104,7 +92,6 @@ class ProductServiceTest {
 
       //then
       verify(productRepository, times(1)).save(any(Product.class));
-      verify(productStockRepository, times(1)).save(any(ProductStock.class));
     }
 
   }
@@ -131,43 +118,6 @@ class ProductServiceTest {
 
       //then
       assertEquals(products, result.getContent());
-    }
-
-  }
-
-  @Nested
-  @DisplayName("상품 재고 조회")
-  class getProductStockById {
-
-    @Test
-    @DisplayName("성공")
-    void success() {
-      //given
-      Long productId = 1L;
-      ProductStock productStock = new ProductStock(productId, 100);
-
-      when(productStockRepository.findById(productId)).thenReturn(Optional.of(productStock));
-
-      //when
-      ProductStockDto response = productService.getProductStockById(productId);
-
-      //then
-      assertEquals(productId, response.productId());
-      assertEquals(productStock.getStock(), response.stock());
-    }
-
-    @Test
-    @DisplayName("실패: 재고 정보 찾을 수 없음")
-    void productStockNotFound() {
-      //given
-      Long productId = 1L;
-
-      //when
-      CustomException exception = assertThrows(CustomException.class, ()
-          -> productService.getProductStockById(productId));
-
-      //then
-      assertEquals(ErrorCode.PRODUCT_STOCK_NOT_FOUND, exception.getErrorCode());
     }
 
   }
@@ -208,73 +158,6 @@ class ProductServiceTest {
       assertEquals(ErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
     }
 
-  }
-
-  @Nested
-  @DisplayName("재고 증가")
-  class addProductStock {
-
-    @Test
-    @DisplayName("성공")
-    void success() {
-      //given
-      Long productId = 1L;
-      LocalDateTime openAt = LocalDateTime.now();
-      Integer quantity = 10;
-      Integer stock = 100;
-
-      Product product = mockReservationProduct(openAt);
-      ProductStock productStock = mockProductStock(productId, stock);
-
-      when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-      when(productStockRepository.findById(productId)).thenReturn(Optional.of(productStock));
-
-      //when
-      productService.addProductStock(productId, quantity);
-
-      //then
-      assertEquals(stock + quantity, productStock.getStock());
-    }
-
-    @Test
-    @DisplayName("실패: 상품 오픈 시간이 아직 되지 않음")
-    void cannotHandleProductStockNow() {
-      //given
-      Long productId = 1L;
-      LocalDateTime openAt = LocalDateTime.now().plusHours(1);
-      Integer quantity = 10;
-      Integer stock = 100;
-
-      Product product = mockReservationProduct(openAt);
-
-      when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-
-      //when
-      CustomException exception = assertThrows(CustomException.class, ()
-          -> productService.addProductStock(productId, quantity));
-
-      //then
-      assertEquals(ErrorCode.CANNOT_HANDLE_PRODUCT_STOCK_NOW, exception.getErrorCode());
-    }
-
-  }
-
-  private ProductStock mockProductStock(Long productId, Integer stock) {
-    return ProductStock.builder()
-        .productId(productId)
-        .stock(stock)
-        .build();
-  }
-
-  private Product mockReservationProduct(LocalDateTime openAt) {
-    return Product.builder()
-        .userId(1L)
-        .name("예약 상품 테스트")
-        .content("예약 상품 테스트 내용")
-        .price(20000L)
-        .isReserved(true)
-        .openAt(openAt)
-        .build();
   }
 
   private Product mockProduct(int num) {

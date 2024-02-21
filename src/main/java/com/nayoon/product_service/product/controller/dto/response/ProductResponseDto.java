@@ -31,6 +31,7 @@ public record ProductResponseDto(
         .name(productDto.name())
         .content(productDto.content())
         .price(productDto.price())
+        .openAt(productDto.openAt())
         .build();
   }
 
