@@ -19,10 +19,10 @@ public class PaymentController {
   private final PaymentService paymentService;
 
   /**
-   * 결제 API
+   * 결제 API 시작
    */
   @PostMapping
-  public ResponseEntity<String> create(
+  public ResponseEntity<String> start(
       @RequestHeader("X-USER-ID") String userId,
       @Valid @RequestBody PaymentCreateRequestDto request
   ) {

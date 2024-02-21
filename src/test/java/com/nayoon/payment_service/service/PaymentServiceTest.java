@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.nayoon.payment_service.client.ProductClient;
 import com.nayoon.payment_service.client.PurchaseClient;
+import com.nayoon.payment_service.client.StockClient;
 import com.nayoon.payment_service.client.dto.PurchaseQuantityResponseDto;
 import com.nayoon.payment_service.entity.Payment;
+import com.nayoon.payment_service.repository.PaymentLoggingRepository;
 import com.nayoon.payment_service.repository.PaymentRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,10 +28,13 @@ class PaymentServiceTest {
   private PaymentRepository paymentRepository;
 
   @Mock
+  private PaymentLoggingRepository paymentLoggingRepository;
+
+  @Mock
   private PurchaseClient purchaseClient;
 
   @Mock
-  private ProductClient productClient;
+  private StockClient stockClient;
 
   @Nested
   @DisplayName("주문 API")
