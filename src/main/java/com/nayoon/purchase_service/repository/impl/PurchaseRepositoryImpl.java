@@ -4,7 +4,6 @@ import static com.nayoon.purchase_service.entity.QPurchase.purchase;
 
 import com.nayoon.purchase_service.entity.Purchase;
 import com.nayoon.purchase_service.repository.PurchaseQRepository;
-import com.nayoon.purchase_service.type.PurchaseStatus;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -23,11 +22,11 @@ public class PurchaseRepositoryImpl implements PurchaseQRepository {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public Page<Purchase> getOrdersByUserId(Long userId, Pageable pageable) {
+  public Page<Purchase> getPurchasesByUserId(Long userId, Pageable pageable) {
     JPAQuery<Purchase> query = queryFactory
         .selectFrom(purchase)
         .where(purchase.userId.eq(userId)
-            .and(purchase.purchaseStatus.eq(PurchaseStatus.CONFIRMED)));
+            .and(purchase.deletedAt.isNull()));
 
     List<OrderSpecifier> order = new ArrayList<>();
     pageable.getSort().stream().forEach(o -> {
@@ -42,6 +41,17 @@ public class PurchaseRepositoryImpl implements PurchaseQRepository {
 
     List<Purchase> result = query.fetch();
     return new PageImpl<>(result, pageable, result.size());
+  }
+
+  @Override
+  public Integer getQuantitySumByProductId(Long productId) {
+    JPAQuery<Integer> query = queryFactory
+        .select(purchase.quantity.sum())
+        .from(purchase)
+        .where(purchase.productId.eq(productId)
+            .and(purchase.deletedAt.isNull()));
+
+    return query.fetchOne();
   }
 
 }
