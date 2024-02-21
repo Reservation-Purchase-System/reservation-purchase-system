@@ -12,8 +12,7 @@ public class PurchaseResponseMapper {
         purchase.getId(),
         purchase.getProductId(),
         purchase.getQuantity(),
-        purchase.getAddress(),
-        purchase.getPurchaseStatus()
+        purchase.getAddress()
     );
   }
 
