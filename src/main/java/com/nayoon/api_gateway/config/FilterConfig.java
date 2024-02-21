@@ -42,6 +42,11 @@ public class FilterConfig {
                 .rewritePath("/payment-service/(?<segment>.*)", "/api/v1/${segment}")
                 .filter(authorizationHeaderFilter.apply(new AuthorizationHeaderFilter.Config())))
             .uri("lb://PAYMENT-SERVICE"))
+        .route(r -> r.path("/stock-service/**")
+            .filters(f -> f
+                .rewritePath("/stock-service/(?<segment>.*)", "/api/v1/${segment}")
+                .filter(authorizationHeaderFilter.apply(new AuthorizationHeaderFilter.Config())))
+            .uri("lb://STOCK-SERVICE"))
         .build();
   }
 
