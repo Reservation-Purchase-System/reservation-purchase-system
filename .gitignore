@@ -1,7 +1,7 @@
 HELP.md
 .gradle
 build/
-!gradle/wrapper/gradle-wrapper.jar
+!module_product_service/gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -36,7 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 /src/main/resources/
-/postgres/
-/.env
 /src/main/generated/
-/db/
