@@ -42,14 +42,24 @@
 `POST /user-service/signup`
 
 ```json
-data : {"email": "test1@example.com",
-"password": "abc123^^",
-"name": "홍길동",
-"greeting": "안녕하세요.",
-"code": "706511",
-"userRole": "USER"
+--boundary
+Content-Disposition: form-data; name="data"
+Content-Type: application/json
+
+{
+  "email": "test1@example.com",
+  "password": "abc123^^",
+  "name": "홍길동",
+  "greeting": "안녕하세요.",
+  "code": "706511",
+  "userRole": "USER"
 }
-profileImage : image.jpg
+--boundary
+Content-Disposition: form-data; name="profileImage"; filename="image.jpg"
+Content-Type: image/jpeg
+
+[이미지 데이터]
+--boundary--
 ```
 | Field          | Type     | Description          |
 |:---------------|:---------|:---------------------|
@@ -113,6 +123,7 @@ profileImage : image.jpg
 
 <details>
 <summary>MSA 구조에서 사용자 인증 방식</summary>
+
 - JWT를 적용하여 인증 서비스와 의존성 없이 각 서비스가 스스로 사용자 인증을 수행
 - API Gateway에서 공통 인증 절차를 수행하여 각 서비스와 인증 절차를 추상화
 - 추가 구현하면 좋을 것 같은 사항
