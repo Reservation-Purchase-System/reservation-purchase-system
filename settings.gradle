@@ -1,0 +1,9 @@
+rootProject.name = 'reservation-purchase-system'
+
+include 'module-user-service'
+include 'module-api-gateway'
+include 'module-eureka'
+include 'module-product-service'
+include 'module-payment-service'
+include 'module-purchase-service'
+include 'module-stock-service'
