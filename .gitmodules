@@ -10,9 +10,6 @@
 [submodule "module-purchase-service"]
 	path = module-purchase-service
 	url = https://github.com/Reservation-Purchase-System/purchase-service.git
-[submodule "module-stock-service"]
-	path = module-stock-service
-	url = https://github.com/Reservation-Purchase-System/stock-service.git
 [submodule "module-user-service"]
 	path = module-user-service
 	url = https://github.com/Reservation-Purchase-System/user-service.git
