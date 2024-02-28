@@ -16,3 +16,6 @@
 [submodule "module-eureka"]
 	path = module-eureka
 	url = https://github.com/Reservation-Purchase-System/eureka.git
+[submodule "module-stock-service"]
+	path = module-stock-service
+	url = https://github.com/Reservation-Purchase-System/stock-service.git
