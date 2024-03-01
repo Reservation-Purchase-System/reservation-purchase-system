@@ -35,19 +35,18 @@
 ## Modules
 - 서비스를 클릭하면 해당 서비스 레포지토리로 이동합니다.
 
-| Service	                                                                          | Description	               | Authorization	 | Port |
-|:----------------------------------------------------------------------------------|:---------------------------|:---------------|:-----|
-| [`User`](https://github.com/Reservation-Purchase-System/user-service.git)         | 사용자 관련 작업 관리               | jwt 토큰으로 권한 검사 | `8080` |
-| [`Product`](https://github.com/Reservation-Purchase-System/product-service.git)   | 상품 관련 작업 관리                |                | `8084` |
-| [`Purchase`](https://github.com/Reservation-Purchase-System/purchase-service.git) | 주문 관련 작업 관리                |                | `8085` |
-| [`Payment`](https://github.com/Reservation-Purchase-System/payment-service.git)   | 결제 관련 작업 관리                |                | `8086` |
-| [`Stock`](https://github.com/Reservation-Purchase-System/stock-service.git)       | 재고 관련 작업 관리                |                | `8087` |
-| [`API Gateway`](https://github.com/Reservation-Purchase-System/api-gateway.git)   | 게이트웨이 역할, 요청을 적절한 서비스로 라우팅 | jwt 토큰으로 권한 검사 | `8083` |
-| [`Eureka`](https://github.com/Reservation-Purchase-System/eureka.git)             | 서비스 등록 및 검색                | | `8761` |
+| Service	                                                                          | Description	                               | Authorization	 | Port |
+|:----------------------------------------------------------------------------------|:-------------------------------------------|:---------------|:-----|
+| [`User`](https://github.com/Reservation-Purchase-System/user-service.git)         | 사용자 관련 작업 관리) | jwt 토큰으로 권한 검사 | `8080` |
+| [`Product`](https://github.com/Reservation-Purchase-System/product-service.git)   | 상품 관련 작업 관리    |                | `8084` |
+| [`Purchase`](https://github.com/Reservation-Purchase-System/purchase-service.git) | 주문 관련 작업 관리   |                | `8085` |
+| [`Payment`](https://github.com/Reservation-Purchase-System/payment-service.git)   | 결제 관련 작업 관리    |                | `8086` |
+| [`Stock`](https://github.com/Reservation-Purchase-System/stock-service.git)       | 재고 관련 작업 관리   |                | `8087` |
+| [`API Gateway`](https://github.com/Reservation-Purchase-System/api-gateway.git)   | 게이트웨이 역할, 요청을 적절한 서비스로 라우팅                 | jwt 토큰으로 권한 검사 | `8083` |
+| [`Eureka`](https://github.com/Reservation-Purchase-System/eureka.git)             | 서비스 등록 및 검색      | | `8761` |
 
 ## ERD
 ![ERD](doc/ERD.png)
-- blah blah
 
 ## Docs
 >### [API 명세서](https://documenter.getpostman.com/view/27585524/2sA2rGtdyi)
