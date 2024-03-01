@@ -1,21 +1,28 @@
 [submodule "module-api-gateway"]
 	path = module-api-gateway
 	url = https://github.com/Reservation-Purchase-System/api-gateway.git
+	branch = develop
 [submodule "module-payment-service"]
 	path = module-payment-service
 	url = https://github.com/Reservation-Purchase-System/payment-service.git
+	branch = develop
 [submodule "module-product-service"]
 	path = module-product-service
 	url = https://github.com/Reservation-Purchase-System/product-service.git
+	branch = develop
 [submodule "module-purchase-service"]
 	path = module-purchase-service
 	url = https://github.com/Reservation-Purchase-System/purchase-service.git
+	branch = develop
 [submodule "module-user-service"]
 	path = module-user-service
 	url = https://github.com/Reservation-Purchase-System/user-service.git
+	branch = develop
 [submodule "module-eureka"]
 	path = module-eureka
 	url = https://github.com/Reservation-Purchase-System/eureka.git
+	branch = main
 [submodule "module-stock-service"]
 	path = module-stock-service
 	url = https://github.com/Reservation-Purchase-System/stock-service.git
+	branch = develop
