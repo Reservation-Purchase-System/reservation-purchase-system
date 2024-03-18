@@ -8,6 +8,7 @@ services:
       - .env
     volumes:
       - ./db/postgres/data:/var/lib/postgres
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     expose:
@@ -27,27 +28,27 @@ services:
     networks:
       - preorder
 
-  user-service:
-    image: user-service:1.0
-    container_name: user-service
-    restart: always
-    build:
-      context: module_user_service/
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    environment:
-      - ${EUREKA_YML}=${EUREKA_URL}
-      - ${REDIS_YML}=${REDIS_HOST}
-      - ${POSTGRES_YML}=${POSTGRES_URL}
-    depends_on:
-      - eureka
-      - postgres
-      - redis
-    networks:
-      - preorder
+#  user-service:
+#    image: user-service:1.0
+#    container_name: user-service
+#    restart: always
+#    build:
+#      context: module_user_service/
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    env_file:
+#      - .env
+#    environment:
+#      - ${EUREKA_YML}=${EUREKA_URL}
+#      - ${REDIS_YML}=${REDIS_HOST}
+#      - ${POSTGRES_YML}=${POSTGRES_URL}
+#    depends_on:
+#      - eureka
+#      - postgres
+#      - redis
+#    networks:
+#      - preorder
 
 #  product-service:
 #    image: product-service:1.0
@@ -71,34 +72,58 @@ services:
 #    networks:
 #      - preorder
 
-  eureka:
-    image: eureka:1.0
-    container_name: eureka
-    restart: always
+#  eureka:
+#    image: eureka:1.0
+#    container_name: eureka
+#    restart: always
+#    build:
+#      context: module_eureka/
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - preorder
+
+  eureka-peer-1:
     build:
-      context: module_eureka/
+      context: module-eureka/
       dockerfile: Dockerfile
+    image: service-discovery/eureka-server
+    hostname: eureka1
+    container_name: eureka-peer1
     ports:
       - "8761:8761"
-    networks:
-      - preorder
-
-  api-gateway:
-    image: api-gateway:1.0
-    container_name: api-gateway
-    build:
-      context: module_api_gateway/
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "8083:8083"
-    env_file:
-      - .env
     environment:
-      - ${EUREKA_YML}=${EUREKA_URL}
-      - ${REDIS_YML}=${REDIS_HOST}
-    networks:
-      - preorder
+      - SPRING_PROFILES_ACTIVE=peer1
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULT-ZONE=http://eureka2:8762/eureka/
+
+  eureka-peer-2:
+    image: service-discovery/eureka-server
+    hostname: eureka2
+    container_name: eureka-peer2
+    ports:
+      - "8762:8762"
+    environment:
+      - SPRING_PROFILES_ACTIVE=peer2
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULT-ZONE=http://eureka1:8761/eureka/
+
+#  api-gateway:
+#    image: api-gateway:1.0
+#    container_name: api-gateway
+#    build:
+#      context: module_api_gateway/
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      - "8083:8083"
+#    env_file:
+#      - .env
+#    environment:
+#      - ${EUREKA_YML}=${EUREKA_URL}
+#      - ${REDIS_YML}=${REDIS_HOST}
+#    networks:
+#      - preorder
+
 
 networks:
   preorder:
