@@ -9,7 +9,6 @@
 - [Docs](#docs)
   - [API 명세서](#api-명세서)
   - [프로젝트 문서](#프로젝트-문서)
-- [도커 컴포즈 실행 명령어](#도커-컴포즈-실행-명령어)
 
 ## Skills
 <div align=center> 
@@ -51,19 +50,3 @@
 ## Docs
 >### [API 명세서](https://documenter.getpostman.com/view/27585524/2sA2rGtdyi)
 >### [프로젝트 문서](https://reservation-purchase-system.gitbook.io/reservation-purchase-system/)
-
-## 도커 컴포즈 실행 명령어
-
-> * 실행
->   ```
->   docker-compose up
->   ```
-> * 빌드 후 실행
->   ```
->   docker-compose up --build
->   ```
-> * 각 모듈 빌드 후 실행
->   ```
->   docker-compose up --build {서비스이름}
->   ```
-
